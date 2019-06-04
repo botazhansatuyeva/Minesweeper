@@ -1,1 +1,80 @@
+import java.awt.EventQueue;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+
+public class Sweeper {
+	public static String Player1;
+	public static String Player2;
+  
+private JFrame frame;
+	private JTextField textField;
+	private JTextField textField_1;
+
+	
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Sweeper window = new Sweeper();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	
+	public Sweeper() {
+		initialize();
+	}
+
+	
+	private void initialize() {
+		frame = new JFrame();
+		frame.setBounds(500, 500, 400, 200);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
+		
+		JLabel lblPlayerName = new JLabel("Player1 name:");
+		lblPlayerName.setBounds(68, 26, 85, 14);
+		frame.getContentPane().add(lblPlayerName);
+		
+		textField = new JTextField();
+		textField.setBounds(163, 23, 86, 20);
+		frame.getContentPane().add(textField);
+		textField.setColumns(10);
+		
+		JLabel lblPlayerName_1 = new JLabel("Player2 name:");
+		lblPlayerName_1.setBounds(68, 57, 85, 14);
+		frame.getContentPane().add(lblPlayerName_1);
+		
+		textField_1 = new JTextField();
+		textField_1.setBounds(163, 54, 86, 20);
+		frame.getContentPane().add(textField_1);
+		textField_1.setColumns(10);
+		
+		
+		JButton btnStartGame = new JButton("Start Game");
+		btnStartGame.setBounds(163, 90, 89, 23);
+		frame.getContentPane().add(btnStartGame);
+		
+		
+		btnStartGame.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				Player1=textField.getText();
+				Player2=textField_1.getText();
+				Sweeper.this.frame.setVisible(false);
+				new MineSweeperMain().setVisible(true);
+			}
+		});
+	}
+}
+		
