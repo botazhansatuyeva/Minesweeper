@@ -1,0 +1,303 @@
+import java.util.Scanner;
+import java.util.Random;
+
+public class MineSweeper {
+	   
+	   public static int[][] board = new int[9][9]; 
+	   public static Scanner in = new Scanner(System.in);
+	   public static int[][] mines = new int[9][9];
+	   public static int state = 0;
+	   public static void init() {
+		   for(int row=0;row<9;row++) {
+				 for(int column=0;column<9;column++) {
+					mines[row][column]=0;
+				 }
+			 }
+		   state=0;
+		   Random rand = new Random();
+		   for(int countbomb=0;countbomb<10;countbomb++) {
+		   int r= rand.nextInt(9);
+		   int c=rand.nextInt(9);
+		   mines[r][c]=1;
+		   }
+		/*	 for(int row=0;row<9;row++) {
+				 for(int column=0;column<9;column++) {
+					System.out.print(" "+mines[row][column]+" ");
+				 }
+				 System.out.println("");
+			 }*/
+		   for(int row=0;row<9;row++) {
+			   for(int column=0;column<9;column++) {
+			board[row][column]=20;
+			   }
+		   }
+	   }
+	 public static void main(String[] args) {
+		 
+		init();
+	   while(state==0) {
+	   printboard();
+	   int row;
+	   int column;
+	   while(true) {
+	   System.out.println("Enter your move(row[1-9] column[1-9]) :");
+	   row = in.nextInt() - 1;
+       column = in.nextInt() - 1;
+	   if(row>-1 && row<9 && column>-1 && column<9 && board[row][column]==20 ) {
+		   break;
+	   }
+	   System.out.println("Invalid move. Try again:");
+	   }
+       move(row,column);
+	   
+	   if(checkState()==1) {
+		   printboard();
+		   System.out.println("Oops! You lose.Would you like to play again?(Y,N)");
+		   String ans=in.next();
+		   if(ans.startsWith("Y")){
+			   init();
+		   }
+		   
+	   }else if(checkState()==2) {
+		   System.out.println("You win. Congrats!");
+	   }
+	   }
+	 }
+	 
+	 public static int checkState() {
+		for(int row=0;row<9;row++) {
+			for(int column=0;column<9;column++) {
+				if(mines[row][column]==1 && board[row][column]!=20) {
+					state=1;
+					return 1;
+				}
+			}
+		}
+		for(int row=0;row<9;row++) {
+			for(int column=0;column<9;column++) {
+				if(board[row][column]==20 && mines[row][column]!=1) {
+					state=0;
+					return 0;
+				}else {
+					state=2;
+				}
+			}
+			
+		}
+		 
+		 
+		 return state;
+	 }
+	 
+	 
+	 public static void printboard() {
+		 for(int row=0;row<9;row++) {
+			 for(int column=0;column<9;column++) {
+				 if(board[row][column]==20) {
+					 System.out.print(" □ ");
+				 }else {
+					 if(mines[row][column]==1) {
+					 System.out.print(" ơ ");
+					 }else {
+					 System.out.print(" "+board[row][column]+" "); 
+					 }
+					 }
+			 }
+			 System.out.println("");
+		 }
+	 }
+	 public static void move(int row,int column) {
+		 if(mines[row][column]==1) {
+		 board[row][column]=99;
+		 }else {                          
+			 
+			
+			// if(board[row][column]==0) {
+			 if(checknearby(row,column)==0) {
+				 removezeros(row, column);
+			 }else {
+				 board[row][column]=checknearby(row,column); 
+			 }
+			 //}
+		 }
+	 }
+	 public static void removezeros(int row,int column) {
+		 if(board[row][column]==20) {
+	 if(checknearby(row,column)==0) {
+		 board[row][column]=0;
+	 
+		 try {
+		 if(checknearby(row-1,column-1)==0) {
+			// board[row-1][column-1]=0;
+			 removezeros(row-1,column-1);
+		 }else {
+			 board[row-1][column-1]=checknearby(row-1,column-1);
+		 }
+	 }catch(Exception ex) {
+	 }
+		 try {
+			 if(checknearby(row-1,column)==0) {
+				// board[row-1][column]=0;
+				 removezeros(row-1,column);
+			 }else {
+				 board[row-1][column]=checknearby(row-1,column);
+			 }
+		 }catch(Exception ex) {
+		 }
+		 try {
+			 if(checknearby(row-1,column+1)==0) {
+				 //board[row-1][column+1]=0;
+				 removezeros(row-1,column+1);
+			 }else {
+				 board[row-1][column+1]=checknearby(row-1,column+1);
+			 }
+		 }catch(Exception ex) {
+		 } 
+		 try {
+			 if(checknearby(row,column-1)==0) {
+				 //board[row][column-1]=0;
+				 removezeros(row,column-1);
+			 }else {
+				 board[row][column-1]=checknearby(row,column-1);
+			 }
+		 }catch(Exception ex) {
+		 }
+		 try {
+			 if(checknearby(row,column+1)==0) {
+				// board[row][column+1]=0;
+				 removezeros(row,column+1);
+			 }else {
+				 board[row][column+1]=checknearby(row,column+1);
+			 }
+		 }catch(Exception ex) {
+		 }
+		 try {
+			 if(checknearby(row+1,column-1)==0) {
+				 //board[row+1][column-1]=0;
+				 removezeros(row+1,column-1);
+			 }else {
+				 board[row+1][column-1]=checknearby(row+1,column-1);
+			 }
+		 }catch(Exception ex) {
+		 }
+		 try {
+			 if(checknearby(row+1,column)==0) {
+				 //board[row+1][column]=0;
+				 removezeros(row+1,column);
+			 }else {
+				 board[row+1][column]=checknearby(row+1,column);
+			 }
+		 }catch(Exception ex) {
+		 }
+		 try {
+			 if(checknearby(row+1,column+1)==0) {
+				 //board[row+1][column+1]=0;
+				 removezeros(row+1,column+1);
+			 }else {
+				 board[row+1][column+1]=checknearby(row+1,column+1);
+			 }
+		 }catch(Exception ex) {
+		 }
+		 
+	 }
+		 }
+	 }
+	 
+	 public static int checknearby(int row, int column) {
+		 int count=0;
+		if(row>0 && row<8 && column>0 && column <8) {
+		 for(int roww=row-1;roww<row+2;roww++) {
+			 for(int col=column-1;col<column+2;col++) {
+			 if(mines[roww][col]==1) {
+				 count++;			
+			 }
+			 }
+		 }
+		}else if(row==0 && column==0) {
+			
+			 for(int roww=row;roww<row+2;roww++) {
+				 for(int col=column;col<column+2;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			 
+		}else if(row==0 && column==8) {
+			
+			 for(int roww=row;roww<row+2;roww++) {
+				 for(int col=column-1;col<column+1;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			
+		}else if(row==8 && column==0) {
+			
+			for(int roww=row-1;roww<row+1;roww++) {
+				 for(int col=column;col<column+2;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			
+		}else if(row==8 && column==8) {
+			
+			for(int roww=row-1;roww<row+1;roww++) {
+				 for(int col=column-1;col<column+1;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			
+		}else if(row==0 && 0<column &&column<8) {
+			
+			for(int roww=row;roww<row+2;roww++) {
+				 for(int col=column-1;col<column+2;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			
+		}else if(row==8 && 0<column &&column<8) {
+			
+			for(int roww=row-1;roww<row+1;roww++) {
+				 for(int col=column-1;col<column+2;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			
+		}else if(column==0 && 0<row && row<8) {
+			
+			for(int roww=row-1;roww<row+2;roww++) {
+				 for(int col=column;col<column+2;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			
+		}else if(column==8 && 0<row && row<8) {
+			
+			for(int roww=row-1;roww<row+2;roww++) {
+				 for(int col=column-1;col<column+1;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			
+		}
+		 
+		 return count;
+	 }
+	 
+	 
+	 
+}
