@@ -1,1 +1,434 @@
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+	import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+	import java.awt.event.MouseEvent;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+	public class Grid extends JPanel {
+		int Bwidth=600;
+		int Bheight=600;
+		Position[][] board;
+		int[][] mines = new int[9][9];
+		JButton[][] fbuttons;
+		static int state=0;
+        String cplayer;
+       
+        Set<String> score1;
+        Set<String> score2;
+	    private final JLabel statusbar;
+
+	    public Grid(JLabel statusbar) {
+
+	        this.statusbar = statusbar;
+	        init();
+	    }
+
+	    private void init() {
+            
+	        setPreferredSize(new Dimension(Bwidth, Bheight));
+	        newgame();
+	    }
+
+	    private void newgame() {
+	    	cplayer=Sweeper.Player1;
+	    	score1=new HashSet();
+	    	score2=new HashSet();
+	    	statusbar.setText(cplayer+"'s turn! Score: "+Sweeper.Player1+"="+score1.size()+","+Sweeper.Player2+"="+score2.size());
+	    	board=new Position[9][9];
+	    	fbuttons=new JButton[9][9];
+	    	for (int row = 0; row < 9; ++row) {
+		         for (int col = 0; col < 9; ++col) {
+		            fbuttons[row][col]=new JButton();
+		            fbuttons[row][col].setPreferredSize(new Dimension(Bwidth/10,Bheight/10));
+		            fbuttons[row][col].setFont(new Font("Arial", Font.PLAIN,20 ));
+		            fbuttons[row][col].addActionListener(new ActionListener(){
+		            	 
+		                public void actionPerformed(ActionEvent e) {
+		                	Object a= e.getSource();
+		                	for(int row=0;row<9;row++) {
+		                		for(int col=0;col<9;col++) {
+		                			if(fbuttons[row][col]==a) {
+		                				move(row,col);
+		                				printboard();
+		                				
+		                				if(checkState()==1) {
+		                					int input = JOptionPane.showConfirmDialog(null, 
+		                			                "Oops! You lose.Would you like to play again?", "",JOptionPane.YES_NO_OPTION);
+		                				   if(input==0) {
+		                					removeAll();
+		                					updateUI();
+		                					newgame();
+		                					return;
+		                				   }else {
+		                					   System.exit(0);
+		                				   }
+		                				   }else if(checkState()==2) {
+		                					   JOptionPane.showMessageDialog(null, "You win. Congrats!", "MineSweeper", JOptionPane.NO_OPTION);
+		                					   System.exit(0);
+		                				   }
+		                				if(cplayer.equals(Sweeper.Player1)) {
+		                					cplayer=Sweeper.Player2;
+		                				}else {
+		                					cplayer=Sweeper.Player1;
+		                				}
+		                				statusbar.setText(cplayer+"'s turn! Score: "+Sweeper.Player1+"="+score1.size()+","+Sweeper.Player2+"="+score2.size());
+		                			}
+		                		}
+		                	}
+		                
+		                }
+		            });
+		            add(fbuttons[row][col]);
+		         }	
+		      }
+	    	
+	    	for (int row = 0; row < 9; ++row) {
+		         for (int col = 0; col < 9; ++col) {
+		            board[row][col] = new Position(row, col);
+		         }
+		      }
+	    	 for(int row=0;row<9;row++) {
+				 for(int column=0;column<9;column++) {
+					mines[row][column]=0;
+				 }
+			 }
+	    	 
+		   state=0;
+		   Random rand = new Random();
+		   for(int countbomb=0;countbomb<10;countbomb++) {
+		   int r= rand.nextInt(9);
+		   int c=rand.nextInt(9);
+		   mines[r][c]=1;
+		   }
+		   for(int row=0;row<9;row++) {
+				 for(int column=0;column<9;column++) {
+					System.out.print(" "+mines[row][column]+" ");
+				 }
+				 System.out.println("");
+			 }
+		   
+		   for(int row=0;row<9;row++) {
+			   for(int column=0;column<9;column++) {
+			board[row][column].element=20;
+			   }
+		   }
+		  
+	    }
+		 public void move(int row,int column) {
+			 if(mines[row][column]==1) {
+			 board[row][column].element=99;
+			 }else {                          
+				 
+				
+				// if(board[row][column]==0) {
+				 if(checknearby(row,column)==0) {
+					 removezeros(row, column);
+				 }else {
+					 if(cplayer.equals(Sweeper.Player1)) {
+					 score1.add(row+","+column);
+				 }else {
+					 score2.add(row+","+column);
+				 }
+					 board[row][column].element=checknearby(row,column); 
+				 }
+				 //}
+			 }
+		 }
+		 public void removezeros(int row,int column) {
+			 if(board[row][column].element==20) {
+		 if(checknearby(row,column)==0) {
+			 System.out.println(row+","+column);
+			 if(cplayer.equals(Sweeper.Player1)) {
+				 score1.add(row+","+column);
+			 }else {
+				 score2.add(row+","+column);
+			 }
+			 board[row][column].element=0;
+		 
+			 try {
+			 if(checknearby(row-1,column-1)==0) {
+				// board[row-1][column-1]=0;
+				 removezeros(row-1,column-1);
+			 }else {
+				 if(cplayer.equals(Sweeper.Player1)) {
+					 score1.add((row-1)+","+(column-1));
+				 }else {
+					 score2.add((row-1)+","+(column-1));
+				 }
+				 board[row-1][column-1].element=checknearby(row-1,column-1);
+			 }
+		 }catch(Exception ex) {
+		 }
+			 try {
+				 if(checknearby(row-1,column)==0) {
+					// board[row-1][column]=0;
+					 removezeros(row-1,column);
+				 }else {
+					 if(cplayer.equals(Sweeper.Player1)) {
+						 score1.add((row-1)+","+column);
+					 }else {
+						 score2.add((row-1)+","+column);
+					 }
+					 board[row-1][column].element=checknearby(row-1,column);
+				 }
+			 }catch(Exception ex) {
+			 }
+			 try {
+				 if(checknearby(row-1,column+1)==0) {
+					 //board[row-1][column+1]=0;
+					 removezeros(row-1,column+1);
+				 }else {
+					 if(cplayer.equals(Sweeper.Player1)) {
+						 score1.add((row-1)+","+(column+1));
+					 }else {
+						 score2.add((row-1)+","+(column+1));
+					 }
+					 board[row-1][column+1].element=checknearby(row-1,column+1);
+				 }
+			 }catch(Exception ex) {
+			 } 
+			 try {
+				 if(checknearby(row,column-1)==0) {
+					 //board[row][column-1]=0;
+					 removezeros(row,column-1);
+				 }else {
+					 if(cplayer.equals(Sweeper.Player1)) {
+						 score1.add(row+","+(column-1));
+					 }else {
+						 score2.add(row+","+(column-1));
+					 }
+					 board[row][column-1].element=checknearby(row,column-1);
+				 }
+			 }catch(Exception ex) {
+			 }
+			 try {
+				 if(checknearby(row,column+1)==0) {
+					// board[row][column+1]=0;
+					 removezeros(row,column+1);
+				 }else {
+					 if(cplayer.equals(Sweeper.Player1)) {
+						 score1.add(row+","+(column+1));
+					 }else {
+						 score2.add(row+","+(column+1));
+					 }
+					 board[row][column+1].element=checknearby(row,column+1);
+				 }
+			 }catch(Exception ex) {
+			 }
+			 try {
+				 if(checknearby(row+1,column-1)==0) {
+					 //board[row+1][column-1]=0;
+					 removezeros(row+1,column-1);
+				 }else {
+					 if(cplayer.equals(Sweeper.Player1)) {
+						 score1.add((row+1)+","+(column-1));
+					 }else {
+						 score2.add((row+1)+","+(column-1));
+					 }
+					 board[row+1][column-1].element=checknearby(row+1,column-1);
+				 }
+			 }catch(Exception ex) {
+			 }
+			 try {
+				 if(checknearby(row+1,column)==0) {
+					 //board[row+1][column]=0;
+					 removezeros(row+1,column);
+				 }else {
+					 if(cplayer.equals(Sweeper.Player1)) {
+						 score1.add((row+1)+","+column);
+					 }else {
+						 score2.add((row+1)+","+column);
+					 }
+					 board[row+1][column].element=checknearby(row+1,column);
+				 }
+			 }catch(Exception ex) {
+			 }
+			 try {
+				 if(checknearby(row+1,column+1)==0) {
+					 //board[row+1][column+1]=0;
+					 removezeros(row+1,column+1);
+				 }else {
+					 if(cplayer.equals(Sweeper.Player1)) {
+						 score1.add((row+1)+","+(column+1));
+					 }else {
+						 score2.add((row+1)+","+(column+1));
+					 }
+					 board[row+1][column+1].element=checknearby(row+1,column+1);
+				 }
+			 }catch(Exception ex) {
+			 }
+			 
+		 }
+			 }
+		 }
+		 
+		 public int checknearby(int row, int column) {
+			 int count=0;
+			if(row>0 && row<8 && column>0 && column <8) {
+			 for(int roww=row-1;roww<row+2;roww++) {
+				 for(int col=column-1;col<column+2;col++) {
+				 if(mines[roww][col]==1) {
+					 count++;			
+				 }
+				 }
+			 }
+			}else if(row==0 && column==0) {
+				
+				 for(int roww=row;roww<row+2;roww++) {
+					 for(int col=column;col<column+2;col++) {
+					 if(mines[roww][col]==1) {
+						 count++;			
+					 }
+					 }
+				 }
+				 
+			}else if(row==0 && column==8) {
+				
+				 for(int roww=row;roww<row+2;roww++) {
+					 for(int col=column-1;col<column+1;col++) {
+					 if(mines[roww][col]==1) {
+						 count++;			
+					 }
+					 }
+				 }
+				
+			}else if(row==8 && column==0) {
+				
+				for(int roww=row-1;roww<row+1;roww++) {
+					 for(int col=column;col<column+2;col++) {
+					 if(mines[roww][col]==1) {
+						 count++;			
+					 }
+					 }
+				 }
+				
+			}else if(row==8 && column==8) {
+				
+				for(int roww=row-1;roww<row+1;roww++) {
+					 for(int col=column-1;col<column+1;col++) {
+					 if(mines[roww][col]==1) {
+						 count++;			
+					 }
+					 }
+				 }
+				
+			}else if(row==0 && 0<column &&column<8) {
+				
+				for(int roww=row;roww<row+2;roww++) {
+					 for(int col=column-1;col<column+2;col++) {
+					 if(mines[roww][col]==1) {
+						 count++;			
+					 }
+					 }
+				 }
+				
+			}else if(row==8 && 0<column &&column<8) {
+				
+				for(int roww=row-1;roww<row+1;roww++) {
+					 for(int col=column-1;col<column+2;col++) {
+					 if(mines[roww][col]==1) {
+						 count++;			
+					 }
+					 }
+				 }
+				
+			}else if(column==0 && 0<row && row<8) {
+				
+				for(int roww=row-1;roww<row+2;roww++) {
+					 for(int col=column;col<column+2;col++) {
+					 if(mines[roww][col]==1) {
+						 count++;			
+					 }
+					 }
+				 }
+				
+			}else if(column==8 && 0<row && row<8) {
+				
+				for(int roww=row-1;roww<row+2;roww++) {
+					 for(int col=column-1;col<column+1;col++) {
+					 if(mines[roww][col]==1) {
+						 count++;			
+					 }
+					 }
+				 }
+				
+			}
+			 
+			 return count;
+		 }
+		 
+		 
+	    
+		 public void printboard() {
+			 for(int row=0;row<9;row++) {
+				 for(int column=0;column<9;column++) {
+					 if(board[row][column].element==20) {
+						 fbuttons[row][column].setText(" ");
+					 }else {
+						 
+						 if(mines[row][column]==1) {
+						 fbuttons[row][column].setText(" ơ ");
+						 fbuttons[row][column].setForeground(Color.red);
+						 }else {
+							 if(board[row][column].element==0) {
+						     fbuttons[row][column].setForeground(Color.gray);
+							 }else if(board[row][column].element==1) {
+								 fbuttons[row][column].setForeground(Color.green);
+							 }else if(board[row][column].element==2) {
+								 fbuttons[row][column].setForeground(Color.blue);
+							 }else {
+								 fbuttons[row][column].setForeground(Color.orange); 
+							 }
+						 fbuttons[row][column].setText(String.valueOf(board[row][column].element));
+						 }
+						 }
+				 }
+				 System.out.println("");
+			 }
+			// revalidate();
+		 }
+	    
+		 public int checkState() {
+				for(int row=0;row<9;row++) {
+					for(int column=0;column<9;column++) {
+						if(mines[row][column]==1 && board[row][column].element!=20) {
+							state=1;
+							return 1;
+						}
+					}
+				}
+				for(int row=0;row<9;row++) {
+					for(int column=0;column<9;column++) {
+						if(board[row][column].element==20 && mines[row][column]!=1) {
+							state=0;
+							return 0;
+						}else {
+							state=2;
+						}
+					}
+					
+				}
+				 
+				 
+				 return state;
+			 }
+	    
+	    
+
+	}
+
+
 
