@@ -1,1 +1,13 @@
+public class Position {
+	int row, col;
+	int element; 
+	public Position(int row, int col) {
+	      this.row = row;
+	      this.col = col;
+	      clear();
+	   }
+	public void clear() {
+	      element = 20;
+	   }
+}
 
