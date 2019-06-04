@@ -1,1 +1,39 @@
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import java.awt.BorderLayout;
+import javax.swing.JButton;
+
+public class MineSweeperMain extends JFrame {
+
+    private JLabel statusbar;
+    
+    public MineSweeperMain() {
+        
+        initUI();
+    }
+    
+    private void initUI() {
+
+        statusbar = new JLabel("");
+        add(statusbar, BorderLayout.SOUTH);
+        add(new Grid(statusbar));        
+        setResizable(false);
+        pack();
+        
+        setTitle("MineSweeper");
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String[] args) {
+        
+        EventQueue.invokeLater(() -> {
+            MineSweeperMain ex = new MineSweeperMain();
+            ex.setVisible(true);
+        });
+    }
+}
 
